@@ -34,7 +34,9 @@ validStatus = ["in_house", "not_checked_in", "checked_out"]
 def main():
     fillMonthStructure()
     reservationJSON = "../data/reservations.json"
-    outputJSON = "../data/output.json"
+    today = date.today().strftime("%m-%d-%Y")
+    outputName = f"{today}_{numMonthsLookAhead}_months"
+    outputJSON = f"../data/{outputName}.json"
     with open(reservationJSON, "r", encoding="utf-8") as f:
         reservations = json.load(f)
     processData(reservations)
@@ -44,7 +46,7 @@ def main():
             del monthlyStats[month]
     with open(outputJSON,"w", encoding="utf-8") as f:
         json.dump(monthlyStats,fp=f, indent=4)
-    createComprehensiveGraph(monthlyStats)
+    # createComprehensiveGraph(monthlyStats)
 
 
 def processData(data):
@@ -154,6 +156,9 @@ def calculateTotalStats():
         monthlyStats[monthFormatted]["revPAR"] = float(f"{totalRevenue / possibleNights:.2f}")
         monthlyStats[monthFormatted]["possibleRevenue"] = float(f"{possibleNights * monthlyStats[monthFormatted]["avgDailyRate"]:.2f}")
         monthlyStats[monthFormatted]["cancelationRate"] = float(f"{totalCancelations / (totalCancelations + numResevations) * 100:.2f}")
+
+
+
 
 def createGraph(monthlyStats):
     # Convert the dictionary to a Pandas DataFrame
