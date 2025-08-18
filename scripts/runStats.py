@@ -10,6 +10,9 @@ import math
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import plotly.io as pio
+import webbrowser
+from calendar import month_name
 
 load_dotenv()
 
@@ -164,7 +167,10 @@ def calculateTotalStats():
 
 
 def createGraph(monthlyStats):
-
+    numRows = 5
+    rowHeights = [0.3, 0.1,0.3,0.2,.1]
+    vertSpacing = .1
+    chartHeights = 2500
     # Convert the dictionary to a Pandas DataFrame
     df_monthly_stats = pd.DataFrame.from_dict(monthlyStats, orient='index')
     df_monthly_stats.index.name = 'Month'
@@ -177,54 +183,68 @@ def createGraph(monthlyStats):
 
     # Create a figure with a 2x2 subplot layout
     fig = make_subplots(
-        rows=2, cols=2,
+        rows=numRows, cols=1,
         shared_xaxes=False,
-        vertical_spacing=0.1,
-        specs=[[{"colspan": 2}, None], [{}, {}]]
+        vertical_spacing=vertSpacing,
+        specs=[[{"type": "xy"}], [{"type": "domain"}], [{"type": "xy"}], [{"type": "xy"}], [{"type": "xy"}]],
+        subplot_titles=("Occupany (%)", 
+                        "Occupancy (%) Table", 
+                        "Number Of Reservations", 
+                        "Average Length Of Stay"),
+        row_heights = rowHeights
     )
 
     # Define color schemes for each chart
     year_colors = {
         2024: ("#5F768E", "#B0C4DE"),
-        2025: ("#8B4513", "#D2B48C")
+        2025: ("#D4610E", "#D2B48C")
     }
 
     # Add the first chart: Occupancy Percentage
-    add_bar_chart(fig, 1, 1, 'occupancyPercent', 'Occupancy', year_colors, df_monthly_stats)
+    add_bar_chart(fig, 1, 1, 'occupancyPercent', 'Occupancy %', year_colors, df_monthly_stats)
 
     # Add the second chart: Number of Reservations
-    add_bar_chart(fig, 2, 1, 'numReservations', 'Reservations', year_colors, df_monthly_stats)
+
+
+    add_bar_chart(fig, 3, 1, 'numReservations', 'Reservations', year_colors, df_monthly_stats)
 
     # Add the third chart: Average Length of Stay
-    add_line_chart(fig, 2, 2, 'avgLengthOfStay', 'Avg Stay', year_colors, df_monthly_stats)
-    fig.add_vline(
-        x=(date.today() - relativedelta(months=1)).month, 
-        line_width = 3, 
-        line_dash ="dash", 
-        line_color = "grey",
-        annotation_text = "Today",
-        annotation_position ="top left",
-        annotation=dict(font_size=15),
-        annotation_font_color = "black"
-        
+    add_line_chart(fig, 4, 1, 'avgLengthOfStay', 'Avg Stay', year_colors, df_monthly_stats)
+
+    add_table(fig,2,1, "occupancyPercent", "Occupancy", df_monthly_stats)
+
+    addAnnotations(fig)
+    # Update the layout for a clean appearance and increased height
+    fig.update_layout(showlegend=False)
+
+    fig.update_layout(
+        title=go.layout.Title(
+            text=f"Hotel Griffintown - 2024/2025 Analytics<br><sup>These analytics are generated on {date.today().strftime("%Y-%m-%d")}</sup>",
+            xref="paper",
+            x=0.5,
+            xanchor="center",
+            yanchor="top"
+        ),
+
+        title_x=0.5,
+        height=chartHeights,
+        plot_bgcolor="#F5F5DC",
+        paper_bgcolor="#DBE8FF",
     )
 
-    # Update the layout for a clean appearance and increased height
-    fig.update_layout(
-        title_text="Monthly Occupancy, Reservations, and Average Stay Comparison (2024 vs 2025)",
-        title_x=0.5,
-        height=900,
-        plot_bgcolor="#F5F5DC",
-        paper_bgcolor="#FFFFFF"
-    )
 
     # Update y-axis titles for each subplot
     fig.update_yaxes(title_text="Occupancy Percentage (%)", row=1, col=1)
-    fig.update_yaxes(title_text="Number of Reservations", row=2, col=1)
-    fig.update_yaxes(title_text="Average Length of Stay (Days)", row=2, col=2)
-    fig.update_xaxes(showgrid=False) # Removes vertical gridlines
+    fig.update_yaxes(title_text="Occupancy Percentage (%)", row=2, col=1)
 
-    fig.show()
+    fig.update_yaxes(title_text="Number of Reservations", row=3, col=1)
+    fig.update_yaxes(title_text="Average Length of Stay (Days)", row=4, col=1)
+    fig.update_xaxes(showgrid=False) # Removes vertical gridlines
+    # fig.show()
+    outputPath = "../data/stats.html"
+    fig.write_html(outputPath)
+    absolute_path = os.path.abspath(outputPath)
+    webbrowser.open_new_tab(f"file://{absolute_path}")
 def createComprehensiveGraph(monthlyStats):
     # Convert the dictionary to a Pandas DataFrame
     df_monthly_stats = pd.DataFrame.from_dict(monthlyStats, orient='index')
@@ -358,9 +378,10 @@ def add_line_chart(fig,row, col, y_col, name, year_colors, df_monthly_stats):
                     name=f"{name} {year}",
                     line=dict(color=faded_color, width=2),
                     marker=dict(color=faded_color, size=8),
-                    showlegend=True
+                    # showlegend=True,
+                    
                 ),
-                row=row, col=col
+                row=row, col=col,
             )
             
         # Add the bold trace for future data
@@ -373,7 +394,8 @@ def add_line_chart(fig,row, col, y_col, name, year_colors, df_monthly_stats):
                     name=f"{name} {year}",
                     line=dict(color=base_color, width=2),
                     marker=dict(color=base_color, size=8, line=dict(width=2, color=base_color)),
-                    showlegend=True
+                    # showlegend=True
+
                 ),
                 row=row, col=col
             )
@@ -406,6 +428,96 @@ def add_bar_chart(fig,row, col, y_col, name, year_colors, df_monthly_stats):
         )
     fig.update_traces(row=row,col=col,textfont_size=12, textposition="outside", cliponaxis=False)
 
+import plotly.graph_objects as go
+import pandas as pd
+from calendar import month_name
+
+def add_table(fig, row, col, y_col, name, df_monthly_stats):
+    # 1. Add a year and month_name column
+    df_monthly_stats['year'] = df_monthly_stats.Month.dt.year
+    df_monthly_stats['month_name'] = df_monthly_stats.Month.dt.strftime('%B')
     
+    # 2. Convert 'month_name' to a categorical type with a defined order
+    ordered_months = [month_name[i] for i in range(1, 13)]
+    df_monthly_stats['month_name'] = pd.Categorical(df_monthly_stats['month_name'], categories=ordered_months, ordered=True)
+    
+    # 3. Pivot the table with years as rows and months as columns
+    df_pivoted = df_monthly_stats.pivot(index='year', columns='month_name', values=y_col).reset_index()
+    
+    # The pivot operation will maintain the month order due to the categorical type,
+    # so sorting is not explicitly needed here.
+
+    # 4. Get the month column names dynamically from the pivoted DataFrame
+    months_columns = [col for col in df_pivoted.columns if col in ordered_months]
+    
+    # Create the header values: 'Year' plus the ordered month names
+    header_values = ['Year'] + months_columns
+    
+    # Create the cell values: 'Year' column plus each month column
+    cell_values = [df_pivoted['year']] + [df_pivoted[month] for month in months_columns]
+
+    fig.add_trace(
+        go.Table(
+            header=dict(values=header_values),
+            cells=dict(values=cell_values)
+        ),
+        row=row, col=col
+    )
+
+def addAnnotations(fig):
+    descriptions = [
+    "This chart displays the monthly occupancy rates. For future months, beginning in September, the data is less accurate. <br> This is because more reservations are typically made closer to the final date, meaning the data is not yet complete and is subject to change as more bookings are secured.",
+    "This table provides a detailed, year-over-year comparison of occupancy rates for each month.  <br> The information for upcoming months, starting in September, should be considered preliminary and less accurate. <br> As more reservations are made closer to the final date, this data is not yet complete and is expected to change.",
+    "This chart shows the number of reservations per month.  It is important to note that the data for future months, beginning in September, is less accurate.<br> Since more reservations are made closer to the final date, the data is not yet complete and does not include bookings that may be made in the coming weeks and months.",
+    "This chart shows the average length of a guest's stay.The data for future months, beginning in September, is less accurate.<br>  This is because more reservations are made closer to the final date, meaning the data is not yet complete and is expected to change as more bookings are finalized."
+    ]
+    annotations = list(fig.layout.annotations)
+    annotations.append(go.layout.Annotation(
+        text=descriptions[0],
+        showarrow=False,
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=.8,
+        xanchor="center",
+        yanchor="top",
+        font=dict(size=15)
+    ))
+    annotations.append(go.layout.Annotation(
+        text=descriptions[1],
+        showarrow=False,
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=.67,
+        xanchor="center",
+        yanchor="top",
+        font=dict(size=15)
+    ))
+    annotations.append(go.layout.Annotation(
+        text=descriptions[2],
+        showarrow=False,
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=.36,
+        xanchor="center",
+        yanchor="top",
+        font=dict(size=15)
+    ))
+    annotations.append(go.layout.Annotation(
+        text=descriptions[3],
+        showarrow=False,
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=.14,
+        xanchor="center",
+        yanchor="top",
+        font=dict(size=15)
+    ))
+
+    fig.update_layout(annotations=annotations)
+
 if(__name__ == "__main__"):
     main()
