@@ -50,7 +50,15 @@ Activate the virtual environment you just created.
 With the virtual environment active, install all the required packages using `pip`.
 `pip install -r requirements.txt`
 
-### 5. Run the Scripts
+### 5. API Key Setup
+
+This project requires a Cloudbeds API key to access your data. Create a file named **`.env`** in the root directory of the project. Inside the file, add your API key in the following format:
+
+`CLOUDBEDS_API_KEY="your_api_key_here"`
+
+Replace `"your_api_key_here"` with the actual API key provided by Cloudbeds.
+
+### 6. Run the Scripts
 
 You're ready to start using the project! Run the scripts in the following order to gather data, analyze it, and generate your reports.
 
@@ -71,4 +79,3 @@ This script performs various statistical analyses on the reservation data and sa
 This script creates graphs based on the data. You can specify which type of graph to create: a simple graph for co-owners or a more detailed, comprehensive graph for internal use.
 
 `python ./scripts/generateGraphs.py`
-
