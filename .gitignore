@@ -2,4 +2,4 @@
 ./data
 *.json
 *.csv
-*.txt
+notes.txt
