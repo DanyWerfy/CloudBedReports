@@ -87,44 +87,6 @@ def apiCall(fullEndPoint,headers, params):
     data = resJSON["data"]
     return data
 
-def testBlockedDates():
-    outputPath = "../data/blockedDates.json"
-    # clear the json
-    with open (outputPath, "w", encoding="utf-8", newline="") as f:
-        pass
-    baseUrl = "https://api.cloudbeds.com/api/v1.3/"
-    endpoint = "getRoom"
-    additionalEndPoint = "Blocks"
-
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "accept": "application/json",
-    }
-
-    initParams = {
-        "propertyID": propertyIDs[0]
-    }
-    finalEndPoint = endpoint + additionalEndPoint
-    fullURL = f"{baseUrl}{finalEndPoint}"
-    response = requests.get(url=fullURL, headers=headers, params=initParams)
-    resJSON = response.json()
-    countPerPage = resJSON["count"]
-    print(f"{countPerPage} per page")
-    loops = 1
-    allReservations = []
-    for i in range(0,loops):
-        params = {
-            "propertyID": propertyIDs[0],
-            "pageNumber": i,
-            "startDate": date(2025,8,1),
-            "endDate": date(2025,8,31)
-        }
-        response = requests.get(url=fullURL, headers=headers, params=params)
-        resJSON = response.json()["data"]
-        print(f"\r{i}/{loops} pages complete        ", end="")
-        allReservations.extend(resJSON)
-    with open (outputPath, "a", encoding="utf-8", newline="") as f:
-            json.dump(resJSON, f, indent = 4)
 
 
 if(__name__ == "__main__"):
