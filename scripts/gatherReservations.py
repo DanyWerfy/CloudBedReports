@@ -87,8 +87,6 @@ def apiCall(fullEndPoint,headers, params):
     data = resJSON["data"]
     return data
 
-
-
 if(__name__ == "__main__"):
     # testBlockedDates()
     getReservations()
