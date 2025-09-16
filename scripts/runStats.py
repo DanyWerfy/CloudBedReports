@@ -24,7 +24,7 @@ monthlyStats = {}
 
 # this number includes current month
 monthNum = date.today().month
-numMonthsLookAhead = 6
+numMonthsLookAhead = 11 - monthNum
 year = date.today().year 
 # totalStartDate = date(year,1,1) - relativedelta(years=1)
 totalStartDate = date.today()

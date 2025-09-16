@@ -22,7 +22,7 @@ year_colors = {
 
 
 def main():
-    jsonFilePath = "../data/08-20-2025_6_months.json"
+    jsonFilePath = "../data/09-16-2025_4_months.json"
     with open(jsonFilePath, "r", encoding="utf-8") as f:
         monthlyStats = json.load(f)
     createGraph(monthlyStats=monthlyStats)
@@ -43,10 +43,7 @@ def createGraph(monthlyStats):
     add_table(fig,3,1, "occupancyPercent", year_colors, df_monthly_stats)
 
     # Add the second chart: Number of Reservations
-    add_bar_chart(fig, 4, 1, 'numReservations', 'Reservations', year_colors, df_monthly_stats)
-
-    # Add the third chart: Average Length of Stay
-    add_line_chart(fig, 5, 1, 'avgLengthOfStay', 'Avg Stay', year_colors, df_monthly_stats)
+    add_bar_chart(fig, 4, 1, 'nightsRented', 'Reservation Nights', year_colors, df_monthly_stats)
 
     # add annotations to the figure. Annotations are the legends, descriptions, and include the title too
     addAnnotations(fig)
@@ -168,9 +165,9 @@ def createComprehensiveGraph(monthlyStats):
 def initFigure(monthlyStats):
     # the num rows is te number of graphs to display - 2.
 # the extra 2 are at the top and bottom to allow for extra spacing
-    numRows = 6
+    numRows = 5
     # the height of each respecive row
-    rowHeights = [.1, 0.3, 0.1,0.3,0.2,.1]
+    rowHeights = [.1, 0.3, 0.1,0.4,0.1]
     # spacing between each row
     vertSpacing = .1
     df_monthly_stats = pd.DataFrame.from_dict(monthlyStats, orient='index')
@@ -186,14 +183,13 @@ def initFigure(monthlyStats):
         shared_xaxes=False,
         vertical_spacing=vertSpacing,
         # domain is for the table, xy for everything else
-        specs=[[{"type": "xy"}], [{"type": "xy"}], [{"type": "domain"}], [{"type": "xy"}], [{"type": "xy"}], [{"type": "xy"}]],
+        specs=[[{"type": "xy"}], [{"type": "xy"}], [{"type": "domain"}], [{"type": "xy"}], [{"type": "xy"}]],
         # titles for the charts
         subplot_titles=(
             "",
             f"Occupancy (%)", 
             f"Occupancy (%) Table", 
-            f"Number Of Reservations", 
-            f"Average Length Of Stay"
+            f"Number Of Reservations"
         ),
         row_heights = rowHeights,
     )
@@ -208,7 +204,7 @@ def saveAndViewFig(fig, outputPath):
     webbrowser.open_new_tab(f"file://{absolute_path}")
 
 # helper function to update the layout. This is used for the simple graph 
-def updateLayout(fig, chartHeights):
+def updateLayout(fig):
     chartHeights = 2500
     fig.update_layout(
     title=go.layout.Title(
@@ -229,8 +225,7 @@ def updateLayout(fig, chartHeights):
     fig.update_yaxes(title_text="Occupancy Percentage (%)", row=1, col=1)
     fig.update_yaxes(title_text="Occupancy Percentage (%)", row=2, col=1)
 
-    fig.update_yaxes(title_text="Number of Reservations", row=3, col=1)
-    fig.update_yaxes(title_text="Average Length of Stay (Days)", row=4, col=1)
+    fig.update_yaxes(title_text="Number of Reservation Nights", row=3, col=1)
     fig.update_xaxes(showgrid=False) 
 # helper function to create a line chart
 def add_line_chart(fig,row, col, y_col, name, year_colors, df_monthly_stats):
@@ -356,7 +351,7 @@ def addAnnotations(fig):
     descriptions = [
     f"{legend}This chart displays the monthly occupancy rates. For future months, beginning in September, the data is less accurate. <br> This is because more reservations are typically made closer to the final date, meaning the data is not yet complete and is subject to change as more bookings are secured.",
     f"This table provides a detailed, year-over-year comparison of occupancy rates for each month.  <br> The information for upcoming months, starting in September, should be considered preliminary and less accurate. <br> As more reservations are made closer to the final date, this data is not yet complete and is expected to change.",
-    f"{legend}This chart shows the number of reservations per month.  It is important to note that the data for future months, beginning in September, is less accurate.<br> Since more reservations are made closer to the final date, the data is not yet complete and does not include bookings that may be made in the coming weeks and months.",
+    f"{legend}This chart shows the number of reservation nights per month. This is a metric which shows how many nights have been booked. It is important to note that the data for future months, beginning in September, is less accurate.<br> Since more reservations are made closer to the final date, the data is not yet complete and does not include bookings that may be made in the coming weeks and months.",
     f"{legend}This chart shows the average length of a guest's stay.The data for future months, beginning in September, is less accurate.<br>  This is because more reservations are made closer to the final date, meaning the data is not yet complete and is expected to change as more bookings are finalized.",
     f"This dashboard provides a comprehensive overview of {years[1]}'s performance compared to {years[0]}.<br> The information for upcoming months, beginning in September, is preliminary and less accurate.<br> This is because most reservations are made closer to the final date, meaning the data is not yet complete and is subject to change as more bookings are secured."
     ]
@@ -370,7 +365,7 @@ def addAnnotations(fig):
         # ew shitty positioning.
         # this is based off trial and error. the numbers are out of 1, 1 being at the top 0 being the bottom 
         x=0.5,
-        y=.71,
+        y=.65,
         xanchor="center",
         yanchor="top",
         font=dict(size=15)
@@ -381,7 +376,7 @@ def addAnnotations(fig):
         xref="paper",
         yref="paper",
         x=0.5,
-        y=.58,
+        y=.50,
         xanchor="center",
         yanchor="top",
         font=dict(size=15)
@@ -392,18 +387,7 @@ def addAnnotations(fig):
         xref="paper",
         yref="paper",
         x=0.5,
-        y=.32,
-        xanchor="center",
-        yanchor="top",
-        font=dict(size=15)
-    ))
-    annotations.append(go.layout.Annotation(
-        text=descriptions[3],
-        showarrow=False,
-        xref="paper",
-        yref="paper",
-        x=0.5,
-        y=.12,
+        y=.14,
         xanchor="center",
         yanchor="top",
         font=dict(size=15)
@@ -414,7 +398,7 @@ def addAnnotations(fig):
         xref="paper",
         yref="paper",
         x=0.5,
-        y=.95,
+        y=.97,
         xanchor="center",
         yanchor="top",
         font=dict(size=15) 

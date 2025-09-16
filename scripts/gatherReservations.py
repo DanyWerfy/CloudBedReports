@@ -68,6 +68,7 @@ def initalCall(fullEndPoint, headers):
     }
     # grab response and convert to JSON
     response = requests.get(url=fullEndPoint, headers=headers, params=initParams)
+    print(response)
     resJSON = response.json()
     totalCount = resJSON["total"]
     countPerPage = resJSON["count"]
